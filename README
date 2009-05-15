@@ -1,0 +1,37 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=2633
+
+How to use the plug-in:
+1. Create `~/.vim_csindent.ini' (default value of `g:csindent_ini') with
+   format:
+       '[' <FILETYPE_NAME> [':' <DEFAULT_INDENT_NAME> ] ']'
+       <INDENT_NAME> '=' <PATH>
+
+   <INDENT_NAME> is common indent file without '.vim' suffix.
+   <PATH> is your path of project.
+
+   If exists <DEFAULT_INDENT_NAME>, then <DEFAULT_INDENT_NAME>.vim file is
+   default indent file for this filetype.
+
+   For example:
+       [cpp:shetukhin]
+       google = $HOME/work/pyctpp2
+
+       [c]
+       linux = $HOME/work/kernels/
+       gnu = $HOME/work/hurd
+
+2. Create `~/.vim/csindent/<FILETYPE_NAME>/<INDENT_NAME>.vim'
+   (instead of `~/.vim/csindent` you can use any path from 'runtimepath').
+   For example:
+        ~/.vim/csindent/cpp/shetukhin.vim
+        ~/.vim/csindent/cpp/google.vim
+        ~/.vim/csindent/c/linux.vim
+        ~/.vim/csindent/c/gnu.vim
+
+Note 1: This script is compatible with `filetype indent`.
+        See `:help filetype`.
+
+Note 2: You can use more informative status line using CodingStyleIndent().
+        For example:
+            set statusline=%<%f%h%m%r%=style=%{CodingStyleIndent()}
+            \ %15(L%l,C%c%V%)\ %3P
