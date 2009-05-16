@@ -1,8 +1,14 @@
 " Vim global plugin for selecting C/C++ coding style (indent)
-" Last Change:	2009 May 15
+" Last Change:	2009 May 16
 " Maintainer:	Konstantin Lepa <konstantin.lepa@gmail.com>
 " License:	This file is placed in the public domain.
-" Version:      1.0.0
+" Version:      1.0.1
+"
+" Changes {{{
+" 1.0.1 2009-05-16
+"   Added CodingStyle() for checking of current coding style.
+"
+"}}}
 
 if exists("g:loaded_coding_style")
   finish
@@ -31,7 +37,8 @@ function s:ReadStyleList(filename)
 endfunction
 
 function s:ReverseCompare(i1, i2)
-  return a:i1['path'] == a:i2['path'] ? 0 : a:i1['path'] > a:i2['path'] ? -1 : 1
+  return a:i1['path'] == a:i2['path'] ? 0 :
+\        a:i1['path'] > a:i2['path'] ? -1 : 1
 endfunction
 
 function s:FindStyle(filetp, curpath)
@@ -60,6 +67,11 @@ function SelectStyle()
   endif
   let l:path = '~/.vim/cs_indent/' . b:coding_style . '.vim'
   source `=l:path`
+endfunction
+
+function CodingStyle()
+  if !exists("b:coding_style") | return 'none' | endif
+  return b:coding_style
 endfunction
 
 au BufNewFile,BufRead * call SelectStyle()
