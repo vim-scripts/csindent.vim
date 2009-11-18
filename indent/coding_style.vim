@@ -1,9 +1,12 @@
 " Vim global plugin for selecting C/C++ coding style (indent)
-" Last Change:	2009 May 17
+" Last Change:	2009 Nov 18
 " Maintainer:	Konstantin Lepa <konstantin.lepa@gmail.com>
-" Version:      1.0.1
+" Version:      1.0.3
 "
 " Changes {{{
+" 1.0.3 2009-11-18
+"   Added support of comments in the g:coding_style_ini file.
+"
 " 1.0.2 2009-05-17
 "   Renamed the folder cs_indent to coding_styles.
 "   Removed styles.txt.
@@ -26,6 +29,9 @@ set cpo&vim
 let s:style_list = {}
 function s:ReadStyleList(filename)
   for l:line in readfile(a:filename)
+    let l:line = substitute(l:line, '^#.*$', "", "")
+    let l:line = substitute(l:line, '\([\\]\)\@<!#.*$', "", "g")
+    let l:line = substitute(l:line, '[\\]#', "#", "g")
     if l:line =~ '^\s*\[\(\S\+\)\]\s*$'
       let l:parsed = matchlist(l:line, '^\s*\[\(\S\+\)\]\s*$')
       let l:ft = l:parsed[1]
