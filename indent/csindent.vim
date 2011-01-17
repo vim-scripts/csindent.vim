@@ -2,9 +2,12 @@
 " Last Change:	2011 Jan 16
 " Maintainer:	Konstantin Lepa <konstantin.lepa@gmail.com>
 " License:      MIT
-" Version:      1.1.0
+" Version:      1.1.1
 "
 " Changes {{{
+" 1.1.1 2011-01-16
+"   Fixed problem of detecting of invalid indent filename.
+"
 " 1.1.0 2011-01-16
 "   Renamed script name from coding_style to csindent.
 "   Added support of default coding style.
@@ -126,7 +129,8 @@ function SelectCodingStyleIndent()
         let g:csindent_dir = expand('~/.vim/csindent')
     endif
     if !filereadable(g:csindent_ini)
-        return 'none'
+        b:csindent = 'none'
+        return
     endif
     call s:ReadConfigFile(g:csindent_ini)
     let b:csindent = s:FindIndentFile(&filetype, expand('%:p:h'))
@@ -137,8 +141,13 @@ function SelectCodingStyleIndent()
             return
         endif
     endif
-    let l:path = g:csindent_dir . '/' . &filetype .
-                \              '/' . b:csindent . '.vim'
+    let l:path = g:csindent_dir . '/' . &filetype . '/' . b:csindent . '.vim'
+
+    if !filereadable(l:path)
+        b:csindent = 'none'
+        return
+    endif
+
     setl noai nocin nosi inde=
     unlet b:did_indent
     source `=l:path`
@@ -150,7 +159,6 @@ function SelectCodingStyleIndent()
 endfunction
 
 function CodingStyleIndent()
-    if !exists("b:csindent") | return 'none' | endif
     return b:csindent
 endfunction
 
