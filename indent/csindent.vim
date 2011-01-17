@@ -2,9 +2,12 @@
 " Last Change:	2011 Jan 16
 " Maintainer:	Konstantin Lepa <konstantin.lepa@gmail.com>
 " License:      MIT
-" Version:      1.1.1
+" Version:      1.1.2
 "
 " Changes {{{
+" 1.1.2 2011-01-17
+"   Fixed syntax errors in SelectCodingStyleIndent().
+"
 " 1.1.1 2011-01-16
 "   Fixed problem of detecting of invalid indent filename.
 "
@@ -129,7 +132,7 @@ function SelectCodingStyleIndent()
         let g:csindent_dir = expand('~/.vim/csindent')
     endif
     if !filereadable(g:csindent_ini)
-        b:csindent = 'none'
+        let b:csindent = 'none'
         return
     endif
     call s:ReadConfigFile(g:csindent_ini)
@@ -144,7 +147,7 @@ function SelectCodingStyleIndent()
     let l:path = g:csindent_dir . '/' . &filetype . '/' . b:csindent . '.vim'
 
     if !filereadable(l:path)
-        b:csindent = 'none'
+        let b:csindent = 'none'
         return
     endif
 
@@ -159,7 +162,8 @@ function SelectCodingStyleIndent()
 endfunction
 
 function CodingStyleIndent()
-    return b:csindent
+    if exists("b:csindent") | return b:csindent | endif
+    return 'none'
 endfunction
 
 au BufNewFile,BufRead * call SelectCodingStyleIndent()
