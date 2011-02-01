@@ -5,6 +5,11 @@
 " Version:      1.1.2
 "
 " Changes {{{
+" 1.2.0 2011-02-01
+"   Added support of Windows.
+"   Removed g:csindent_dir. Used 'runtimepath' instead it.
+"   Added support of expanding environment variables in g:csindent_ini.
+"
 " 1.1.2 2011-01-17
 "   Fixed syntax errors in SelectCodingStyleIndent().
 "
@@ -32,6 +37,8 @@
 " 1.0.1 2009-05-16
 "   Added CodingStyle() for checking of current coding style.
 "
+" 1.0.0 2009-05-15
+"   Initial upload.
 "}}}
 "
 " How to use the plug-in:
@@ -48,14 +55,15 @@
 "
 "    For example:
 "        [cpp:shetukhin]
-"        google = /home/pitman/work/pyctpp2
+"        google = $HOME/work/pyctpp2
 "
 "        [c]
-"        linux = /home/pitman/work/kernels/
-"        gnu = /home/pitman/work/hurd
+"        linux = $HOME/work/kernels/
+"        gnu = $HOME/work/hurd
 "
-" 2. Create `~/.vim/csindent/<FILETYPE_NAME>/<INDENT_NAME>.vim',
-"    `~/.vim/csindent` is default value of `g:csindent_dir'. For example:
+" 2. Create `~/.vim/csindent/<FILETYPE_NAME>/<INDENT_NAME>.vim'
+"    (instead of `~/.vim/csindent` you can use any path from 'runtimepath').
+"    For example:
 "         ~/.vim/csindent/cpp/shetukhin.vim
 "         ~/.vim/csindent/cpp/google.vim
 "         ~/.vim/csindent/c/linux.vim
@@ -100,7 +108,7 @@ function s:ReadConfigFile(filename)
                 let s:indent_map[l:ft] = []
             endif
             call extend(s:indent_map[l:ft],
-\                 [{'name': l:parsed[1], 'path': l:parsed[2]}])
+\                 [{'name': l:parsed[1], 'path': expand(l:parsed[2])}])
         endif
     endfor
 endfunction
@@ -113,11 +121,11 @@ endfunction
 function s:FindIndentFile(filetp, curpath)
     if !has_key(s:indent_map, a:filetp) | return 'none' | endif
     for l:line in sort(s:indent_map[a:filetp], 's:ReverseCompare')
-        if l:line['path'] =~ '/\s*$' || l:line['path'] =~ '\\\s*$'
+        if l:line['path'] =~ '[/\]\s*$' || l:line['path'] =~ '\\\s*$'
             let l:pathlen = strlen(l:line['path'])
             let l:line['path'] = strpart(l:line['path'], 0, l:pathlen - 1)
         endif
-        if match(a:curpath, l:line['path']) == 0
+        if match(tr(a:curpath, '\', '/'), tr(l:line['path'], '\', '/')) == 0
             return l:line['name']
         endif
     endfor
@@ -127,9 +135,6 @@ endfunction
 function SelectCodingStyleIndent()
     if !exists('g:csindent_ini')
         let g:csindent_ini = expand('~/.vim_csindent.ini')
-    endif
-    if !exists('g:csindent_dir')
-        let g:csindent_dir = expand('~/.vim/csindent')
     endif
     if !filereadable(g:csindent_ini)
         let b:csindent = 'none'
@@ -144,9 +149,18 @@ function SelectCodingStyleIndent()
             return
         endif
     endif
-    let l:path = g:csindent_dir . '/' . &filetype . '/' . b:csindent . '.vim'
-
-    if !filereadable(l:path)
+    
+    let l:tmp = globpath(&rtp,
+                \ 'csindent' . '/' . &filetype . '/' . b:csindent . '.vim')
+    let l:path_list = l:tmp == type([]) ? l:tmp : [l:tmp]
+    for l:path in l:path_list
+        if filereadable(l:path)
+            let l:found = 1
+            break
+        endif
+    endfor
+    
+    if !exists("l:found")
         let b:csindent = 'none'
         return
     endif
